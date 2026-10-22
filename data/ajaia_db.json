@@ -1,0 +1,93 @@
+{
+  "users": [
+    {
+      "id": "user-1",
+      "name": "Aryarajsinh Harma",
+      "email": "harmaaryarajsinh2003@gmail.com",
+      "role_title": "Full Stack Product Engineer",
+      "avatar_color": "#4F46E5"
+    },
+    {
+      "id": "user-2",
+      "name": "Sarah Chen",
+      "email": "sarah@ajaia.com",
+      "role_title": "Head of Product",
+      "avatar_color": "#059669"
+    },
+    {
+      "id": "user-3",
+      "name": "Alex Rivera",
+      "email": "alex@ajaia.com",
+      "role_title": "Staff AI Engineer",
+      "avatar_color": "#D97706"
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-1",
+      "title": "Ajaia Q4 AI Product Roadmap",
+      "content": "<h1>Ajaia Q4 AI Product Roadmap</h1><p>Welcome to <strong>Ajaia Docs</strong> — a lightweight, AI-native collaborative workspace built for rapid product execution.</p><h2>Core Priorities</h2><ul><li><strong>Real-time Document Workflows:</strong> Fast rich-text editing with zero-friction persistence.</li><li><strong>Seamless File Ingestion:</strong> Upload <u>.md</u>, <u>.txt</u>, or <u>.docx</u> files directly into structured drafts.</li><li><strong>Granular Access Control:</strong> Share documents across team members with <em>Edit</em> or <em>View-Only</em> permissions.</li></ul><h2>Next Steps</h2><ol><li>Review architecture tradeoffs in the sidebar.</li><li>Switch between seeded team accounts in the top navigation bar to test sharing permissions.</li><li>Try uploading a local Markdown or Word document!</li></ol>",
+      "owner_id": "user-1",
+      "source_file_name": null,
+      "created_at": "2026-10-22T09:29:14.747Z",
+      "updated_at": "2026-10-22T09:29:14.748Z"
+    },
+    {
+      "id": "doc-2",
+      "title": "Engineering Architecture RFC: Agentic Workflows",
+      "content": "<h1>Engineering Architecture RFC</h1><p>Authored by <strong>Sarah Chen</strong> and shared with Aryarajsinh for technical review.</p><h2>1. Context</h2><p>We need a resilient orchestration layer that combines deterministic validation with LLM-assisted synthesis.</p><h2>2. Proposed Guardrails</h2><ul><li>Strict schema validation on all API boundaries</li><li>Role-based access control at the persistence layer</li></ul>",
+      "owner_id": "user-2",
+      "source_file_name": "architecture-rfc.md",
+      "created_at": "2026-10-22T09:29:14.748Z",
+      "updated_at": "2026-10-22T09:29:14.748Z"
+    },
+    {
+      "id": "doc-1792661354850-nju9m",
+      "title": "Sprint Planning Spec",
+      "content": "<h1>Sprint Goals</h1><ul><li>Ship MVP</li></ul>",
+      "owner_id": "user-1",
+      "source_file_name": null,
+      "created_at": "2026-10-22T09:29:14.850Z",
+      "updated_at": "2026-10-22T09:29:14.850Z"
+    },
+    {
+      "id": "doc-1792661354925-r1qxe",
+      "title": "launch plan",
+      "content": "<h1>Product Launch</h1>\n<ul>\n<li><strong>Bold item</strong></li>\n<li><em>Italic item</em></li>\n</ul>\n",
+      "owner_id": "user-1",
+      "source_file_name": "launch-plan.md",
+      "created_at": "2026-10-22T09:29:14.925Z",
+      "updated_at": "2026-10-22T09:29:14.925Z"
+    }
+  ],
+  "document_shares": [
+    {
+      "id": 1,
+      "document_id": "doc-1",
+      "user_id": "user-2",
+      "permission": "edit",
+      "created_at": "2026-10-22T09:29:14.748Z"
+    },
+    {
+      "id": 2,
+      "document_id": "doc-1",
+      "user_id": "user-3",
+      "permission": "view",
+      "created_at": "2026-10-22T09:29:14.748Z"
+    },
+    {
+      "id": 3,
+      "document_id": "doc-2",
+      "user_id": "user-1",
+      "permission": "edit",
+      "created_at": "2026-10-22T09:29:14.748Z"
+    },
+    {
+      "id": 1792661354880,
+      "document_id": "doc-1792661354850-nju9m",
+      "user_id": "user-3",
+      "permission": "view",
+      "created_at": "2026-10-22T09:29:14.880Z"
+    }
+  ]
+}
