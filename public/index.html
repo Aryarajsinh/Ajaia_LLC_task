@@ -2,59 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <title>Ajaia Docs — AI-Native Collaborative Editor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    #editor-canvas h1 { font-size: 1.875rem; font-weight: 700; margin-bottom: 0.75rem; color: #111827; line-height: 1.25; }
-    #editor-canvas h2 { font-size: 1.375rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #1F2937; }
-    #editor-canvas h3 { font-size: 1.125rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.4rem; color: #374151; }
+    /* Mobile-first base styles and typography */
+    #editor-canvas h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.65rem; color: #111827; line-height: 1.25; }
+    #editor-canvas h2 { font-size: 1.25rem; font-weight: 600; margin-top: 1.1rem; margin-bottom: 0.45rem; color: #1F2937; }
+    #editor-canvas h3 { font-size: 1.05rem; font-weight: 600; margin-top: 0.9rem; margin-bottom: 0.35rem; color: #374151; }
     #editor-canvas p { margin-bottom: 0.75rem; line-height: 1.7; color: #374151; }
-    #editor-canvas ul { list-style-type: disc; padding-left: 1.75rem; margin-bottom: 0.75rem; }
-    #editor-canvas ol { list-style-type: decimal; padding-left: 1.75rem; margin-bottom: 0.75rem; }
+    #editor-canvas ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    #editor-canvas ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
     #editor-canvas li { margin-bottom: 0.25rem; line-height: 1.6; }
-    #editor-canvas hr { margin: 1.5rem 0; border-color: #E5E7EB; }
+    #editor-canvas hr { margin: 1.25rem 0; border-color: #E5E7EB; }
     #editor-canvas:focus { outline: none; }
+
+    @media (min-width: 640px) {
+      #editor-canvas h1 { font-size: 1.875rem; margin-bottom: 0.75rem; }
+      #editor-canvas h2 { font-size: 1.375rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+      #editor-canvas h3 { font-size: 1.125rem; margin-top: 1rem; margin-bottom: 0.4rem; }
+      #editor-canvas ul, #editor-canvas ol { padding-left: 1.75rem; }
+    }
+
+    /* Prevent mobile browser auto-zoom by maintaining minimum 16px font on small screens */
+    @media (max-width: 640px) {
+      select, input[type="text"], input[type="file"] {
+        font-size: 16px !important;
+      }
+    }
+
+    /* Utility to hide scrollbars for sleek mobile horizontal scrolling */
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Safe viewport height handling for mobile browsers */
+    .app-height {
+      height: 100vh;
+      height: 100dvh;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 h-screen flex flex-col overflow-hidden font-sans">
+<body class="bg-slate-50 text-slate-900 app-height flex flex-col overflow-hidden font-sans">
 
-  <!-- TOP NAVBAR: Brand + Instant Seeded Account Switcher -->
-  <header class="bg-white border-b border-slate-200 px-5 py-2.5 flex items-center justify-between shrink-0 z-10">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
-        <i class="fa-solid fa-file-signature"></i>
+  <!-- TOP NAVBAR: Brand + Mobile Menu Button + Seeded Account Switcher -->
+  <header class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5 flex items-center justify-between shrink-0 z-20">
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <!-- Mobile Sidebar Drawer Toggle Button -->
+      <button
+        id="sidebar-toggle"
+        onclick="toggleSidebar(true)"
+        class="lg:hidden p-2 -ml-1 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition shrink-0"
+        title="Open Documents Sidebar"
+        aria-label="Toggle document list"
+      >
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+
+      <!-- App Logo -->
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+        <i class="fa-solid fa-file-signature text-sm sm:text-base"></i>
       </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-slate-900 tracking-tight text-lg">Ajaia Docs</span>
-          <span class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">AI-Native Workspace</span>
+
+      <!-- App Name & Subtitle -->
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <span class="font-bold text-slate-900 tracking-tight text-base sm:text-lg truncate">Ajaia Docs</span>
+          <span class="hidden sm:inline-flex text-[11px] sm:text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium shrink-0">AI-Native</span>
         </div>
-        <p class="text-xs text-slate-500">Lightweight Collaborative Document Editor</p>
+        <p class="hidden md:block text-xs text-slate-500">Lightweight Collaborative Document Editor</p>
       </div>
     </div>
 
     <!-- Account Switcher for Testing Sharing Flows -->
-    <div class="flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-      <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Active User:</span>
-      <select id="user-switcher" class="bg-white border border-slate-300 text-slate-800 text-sm rounded-lg px-3 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"></select>
-      <span id="active-user-badge" class="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-medium"></span>
+    <div class="flex items-center gap-1.5 sm:gap-3 bg-slate-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-200 shrink-0">
+      <span class="hidden md:inline text-xs font-medium text-slate-500 uppercase tracking-wider">Active User:</span>
+      <i class="fa-solid fa-user-circle text-slate-500 text-sm md:hidden shrink-0"></i>
+      <select id="user-switcher" class="bg-white border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg px-2 sm:px-3 py-1 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer max-w-[130px] sm:max-w-[210px] truncate"></select>
+      <span id="active-user-badge" class="hidden xl:inline text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-medium shrink-0"></span>
     </div>
   </header>
 
   <!-- MAIN WORKSPACE -->
-  <div class="flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden relative">
 
-    <!-- LEFT SIDEBAR: Document List (Owned vs Shared) & File Upload -->
-    <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
-      <div class="p-4 border-b border-slate-100 space-y-2">
-        <button onclick="createNewDocument()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-sm">
+    <!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+    <div
+      id="sidebar-backdrop"
+      onclick="toggleSidebar(false)"
+      class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 lg:hidden hidden transition-opacity duration-200"
+      aria-hidden="true"
+    ></div>
+
+    <!-- LEFT SIDEBAR: Document List & File Upload -->
+    <!-- Desktop: static w-80. Mobile: fixed sliding drawer with smooth translate-x -->
+    <aside
+      id="sidebar"
+      class="fixed inset-y-0 left-0 z-40 w-72 sm:w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-2xl lg:shadow-none -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out"
+    >
+      <!-- Mobile Drawer Header with Close Button -->
+      <div class="p-3.5 border-b border-slate-100 flex items-center justify-between lg:hidden bg-slate-50/60">
+        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+          <i class="fa-solid fa-folder-open text-indigo-600"></i>
+          <span>Documents & Files</span>
+        </div>
+        <button
+          onclick="toggleSidebar(false)"
+          class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition"
+          aria-label="Close sidebar"
+        >
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="p-3 sm:p-4 border-b border-slate-100 space-y-2">
+        <button onclick="createNewDocument()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2 text-sm">
           <i class="fa-solid fa-plus"></i> New Document
         </button>
 
         <div class="flex gap-2">
-          <button onclick="openUploadModal('new')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5 text-xs border border-slate-200">
+          <button onclick="openUploadModal('new')" class="flex-1 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition flex items-center justify-center gap-1.5 text-xs border border-slate-200">
             <i class="fa-solid fa-file-arrow-up text-indigo-600"></i> Upload File (.md/.txt/.docx)
           </button>
         </div>
@@ -82,94 +155,122 @@
       <!-- Supported Formats Footer Note -->
       <div class="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500">
         <p class="font-medium text-slate-700 mb-0.5"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> File Upload Support</p>
-        <p>Supports <code>.txt</code>, <code>.md</code>, and <code>.docx</code> up to 5MB. Files can create a new doc or append to an active draft.</p>
+        <p class="text-[11px] leading-relaxed">Supports <code>.txt</code>, <code>.md</code>, and <code>.docx</code> up to 5MB. Files create a new document or import into an active draft.</p>
       </div>
     </aside>
 
     <!-- CENTER: Document Header, Rich Text Toolbar, and Editor Surface -->
-    <main class="flex-1 flex flex-col overflow-hidden bg-slate-100">
+    <main class="flex-1 flex flex-col overflow-hidden bg-slate-100 min-w-0">
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4">
+      <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center overflow-y-auto">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl sm:text-2xl mb-4 shadow-xs">
           <i class="fa-regular fa-file-lines"></i>
         </div>
-        <h2 class="text-lg font-semibold text-slate-800">No Document Selected</h2>
-        <p class="text-sm text-slate-500 max-w-md mt-1">Select a document from the sidebar, create a new blank draft, or upload a <code>.md</code>, <code>.txt</code>, or <code>.docx</code> file.</p>
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800">No Document Selected</h2>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-md mt-1 leading-relaxed">Select a document from the sidebar, create a new blank draft, or upload a <code>.md</code>, <code>.txt</code>, or <code>.docx</code> file.</p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+          <button onclick="toggleSidebar(true)" class="lg:hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-3.5 rounded-lg shadow-sm transition flex items-center gap-2 text-xs">
+            <i class="fa-solid fa-folder-open"></i> Browse Documents
+          </button>
+          <button onclick="createNewDocument()" class="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-3.5 rounded-lg shadow-sm transition flex items-center gap-2 text-xs">
+            <i class="fa-solid fa-plus"></i> New Blank Draft
+          </button>
+        </div>
       </div>
 
       <!-- Active Document Container -->
-      <div id="editor-container" class="flex-1 flex flex-col overflow-hidden">
+      <div id="editor-container" class="flex-1 flex flex-col overflow-hidden min-w-0">
 
         <!-- Document Meta & Action Bar -->
-        <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between gap-4">
+        <div class="bg-white border-b border-slate-200 px-3 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4 shrink-0">
+          <!-- Title, Badges, and Meta Info -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2.5">
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
               <input
                 id="doc-title-input"
                 type="text"
                 placeholder="Document Title..."
-                class="text-lg font-bold text-slate-900 bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white rounded px-2 py-0.5 w-full max-w-lg focus:outline-none transition"
+                class="text-base sm:text-lg font-bold text-slate-900 bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white rounded px-1.5 sm:px-2 py-0.5 w-full md:w-auto md:max-w-md lg:max-w-lg focus:outline-none transition truncate"
                 oninput="scheduleAutoSave()"
               />
-              <span id="access-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0"></span>
-              <span id="source-file-badge" class="hidden text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 shrink-0"></span>
+              <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                <span id="access-badge" class="text-[11px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-full font-semibold shrink-0"></span>
+                <span id="source-file-badge" class="hidden text-[10px] sm:text-xs bg-slate-100 text-slate-600 px-1.5 sm:px-2 py-0.5 rounded border border-slate-200 shrink-0 max-w-[130px] sm:max-w-none truncate"></span>
+              </div>
             </div>
-            <div class="flex items-center gap-3 text-xs text-slate-500 px-2 mt-0.5">
-              <span id="doc-owner-label"></span>
-              <span>•</span>
-              <span id="save-status" class="text-emerald-600 font-medium"><i class="fa-solid fa-check mr-1"></i>Saved</span>
+            <div class="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 px-1.5 mt-0.5 truncate">
+              <span id="doc-owner-label" class="truncate"></span>
+              <span class="text-slate-300 shrink-0">•</span>
+              <span id="save-status" class="text-emerald-600 font-medium shrink-0"><i class="fa-solid fa-check mr-1"></i>Saved</span>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 shrink-0">
-            <button id="import-into-doc-btn" onclick="openUploadModal('append')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5">
-              <i class="fa-solid fa-file-import text-indigo-600"></i> Import File Into Draft
+          <!-- Action Buttons Bar (Responsive with icons and mobile-friendly tap targets) -->
+          <div class="flex items-center gap-1 sm:gap-2 shrink-0 overflow-x-auto pb-1 md:pb-0 scrollbar-none w-full md:w-auto justify-start md:justify-end">
+            <!-- Mobile Menu Toggle to easily jump back to document list -->
+            <button
+              onclick="toggleSidebar(true)"
+              class="lg:hidden px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition flex items-center gap-1 shrink-0"
+              title="Open Documents List"
+            >
+              <i class="fa-solid fa-folder-open text-indigo-600"></i>
+              <span>Docs</span>
             </button>
-            <button onclick="exportDocument()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5" title="Export HTML">
-              <i class="fa-solid fa-download"></i> Export
+
+            <button id="import-into-doc-btn" onclick="openUploadModal('append')" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shrink-0" title="Import File Into Draft">
+              <i class="fa-solid fa-file-import text-indigo-600"></i>
+              <span class="hidden sm:inline">Import File</span>
+              <span class="sm:hidden">Import</span>
             </button>
-            <button id="share-btn" onclick="openShareModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1.5">
-              <i class="fa-solid fa-user-plus"></i> Share <span id="share-count-pill" class="bg-indigo-600 text-white px-1.5 rounded-full text-[10px]">0</span>
+            <button onclick="exportDocument()" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shrink-0" title="Export HTML">
+              <i class="fa-solid fa-download"></i>
+              <span class="hidden sm:inline">Export</span>
             </button>
-            <button id="save-btn" onclick="saveCurrentDocument(true)" class="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5">
-              <i class="fa-solid fa-floppy-disk"></i> Save
+            <button id="share-btn" onclick="openShareModal()" class="px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1.5 shrink-0" title="Share Document">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Share</span>
+              <span id="share-count-pill" class="bg-indigo-600 text-white px-1.5 rounded-full text-[10px]">0</span>
             </button>
-            <button id="delete-btn" onclick="deleteCurrentDocument()" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition text-xs" title="Delete Document">
+            <button id="save-btn" onclick="saveCurrentDocument(true)" class="px-3 sm:px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shrink-0" title="Save Document">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Save</span>
+            </button>
+            <button id="delete-btn" onclick="deleteCurrentDocument()" class="p-2 sm:p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition text-xs shrink-0" title="Delete Document" aria-label="Delete Document">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
         </div>
 
-        <!-- Rich Text Formatting Toolbar -->
-        <div id="formatting-toolbar" class="bg-slate-50 border-b border-slate-200 px-6 py-1.5 flex items-center gap-1 flex-wrap">
-          <button onclick="formatDoc('bold')" class="px-2.5 py-1 rounded hover:bg-slate-200 text-slate-700 text-sm" title="Bold (Ctrl+B)"><i class="fa-solid fa-bold"></i></button>
-          <button onclick="formatDoc('italic')" class="px-2.5 py-1 rounded hover:bg-slate-200 text-slate-700 text-sm" title="Italic (Ctrl+I)"><i class="fa-solid fa-italic"></i></button>
-          <button onclick="formatDoc('underline')" class="px-2.5 py-1 rounded hover:bg-slate-200 text-slate-700 text-sm" title="Underline (Ctrl+U)"><i class="fa-solid fa-underline"></i></button>
-          <div class="h-4 w-px bg-slate-300 mx-1"></div>
-          <button onclick="formatDoc('formatBlock', 'H1')" class="px-2 py-1 rounded hover:bg-slate-200 text-slate-700 text-xs font-bold" title="Heading 1">H1</button>
-          <button onclick="formatDoc('formatBlock', 'H2')" class="px-2 py-1 rounded hover:bg-slate-200 text-slate-700 text-xs font-bold" title="Heading 2">H2</button>
-          <button onclick="formatDoc('formatBlock', 'H3')" class="px-2 py-1 rounded hover:bg-slate-200 text-slate-700 text-xs font-bold" title="Heading 3">H3</button>
-          <button onclick="formatDoc('formatBlock', 'P')" class="px-2 py-1 rounded hover:bg-slate-200 text-slate-700 text-xs font-medium" title="Normal Text">Body</button>
-          <div class="h-4 w-px bg-slate-300 mx-1"></div>
-          <button onclick="formatDoc('insertUnorderedList')" class="px-2.5 py-1 rounded hover:bg-slate-200 text-slate-700 text-sm" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
-          <button onclick="formatDoc('insertOrderedList')" class="px-2.5 py-1 rounded hover:bg-slate-200 text-slate-700 text-sm" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
-          <div class="h-4 w-px bg-slate-300 mx-1"></div>
-          <button onclick="formatDoc('removeFormat')" class="px-2 py-1 rounded hover:bg-slate-200 text-slate-600 text-xs" title="Clear Formatting"><i class="fa-solid fa-eraser mr-1"></i>Clear</button>
+        <!-- Rich Text Formatting Toolbar (Touch-friendly & horizontal scroll on mobile) -->
+        <div id="formatting-toolbar" class="bg-slate-50 border-b border-slate-200 px-3 sm:px-6 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none shrink-0">
+          <button onclick="formatDoc('bold')" class="p-2 sm:px-2.5 sm:py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm shrink-0 min-w-[32px] text-center" title="Bold (Ctrl+B)"><i class="fa-solid fa-bold"></i></button>
+          <button onclick="formatDoc('italic')" class="p-2 sm:px-2.5 sm:py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm shrink-0 min-w-[32px] text-center" title="Italic (Ctrl+I)"><i class="fa-solid fa-italic"></i></button>
+          <button onclick="formatDoc('underline')" class="p-2 sm:px-2.5 sm:py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm shrink-0 min-w-[32px] text-center" title="Underline (Ctrl+U)"><i class="fa-solid fa-underline"></i></button>
+          <div class="h-4 w-px bg-slate-300 mx-1 shrink-0"></div>
+          <button onclick="formatDoc('formatBlock', 'H1')" class="px-2 py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-xs font-bold shrink-0 min-w-[32px] text-center" title="Heading 1">H1</button>
+          <button onclick="formatDoc('formatBlock', 'H2')" class="px-2 py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-xs font-bold shrink-0 min-w-[32px] text-center" title="Heading 2">H2</button>
+          <button onclick="formatDoc('formatBlock', 'H3')" class="px-2 py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-xs font-bold shrink-0 min-w-[32px] text-center" title="Heading 3">H3</button>
+          <button onclick="formatDoc('formatBlock', 'P')" class="px-2 py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-xs font-medium shrink-0 min-w-[32px] text-center" title="Normal Text">Body</button>
+          <div class="h-4 w-px bg-slate-300 mx-1 shrink-0"></div>
+          <button onclick="formatDoc('insertUnorderedList')" class="p-2 sm:px-2.5 sm:py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm shrink-0 min-w-[32px] text-center" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+          <button onclick="formatDoc('insertOrderedList')" class="p-2 sm:px-2.5 sm:py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-700 text-sm shrink-0 min-w-[32px] text-center" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+          <div class="h-4 w-px bg-slate-300 mx-1 shrink-0"></div>
+          <button onclick="formatDoc('removeFormat')" class="px-2 py-1 rounded hover:bg-slate-200 active:bg-slate-300 text-slate-600 text-xs shrink-0 flex items-center gap-1" title="Clear Formatting"><i class="fa-solid fa-eraser"></i><span class="hidden sm:inline">Clear</span></button>
         </div>
 
         <!-- Read-Only Banner (Shown when user has 'view' permission) -->
-        <div id="readonly-banner" class="hidden bg-amber-50 border-b border-amber-200 px-6 py-2 text-xs text-amber-800 flex items-center justify-between">
-          <span><i class="fa-solid fa-lock mr-1.5"></i><strong>View-Only Access:</strong> This document was shared with you in read-only mode. Switch to the Owner account in the top-right bar to edit or change permissions.</span>
+        <div id="readonly-banner" class="hidden bg-amber-50 border-b border-amber-200 px-3 sm:px-6 py-2 text-xs text-amber-800 flex items-center justify-between shrink-0">
+          <span><i class="fa-solid fa-lock mr-1.5"></i><strong>View-Only:</strong> Shared in read-only mode. Switch to the Owner in top bar to edit.</span>
         </div>
 
-        <!-- Document Canvas -->
-        <div class="flex-1 overflow-y-auto p-6 md:p-10 flex justify-center">
+        <!-- Document Canvas Surface -->
+        <div class="flex-1 overflow-y-auto p-2.5 sm:p-6 md:p-10 flex justify-center">
           <div
             id="editor-canvas"
             contenteditable="true"
             oninput="scheduleAutoSave()"
-            class="w-full max-w-3xl bg-white min-h-[700px] shadow-sm border border-slate-200/80 rounded-xl p-8 md:p-12 focus:ring-2 focus:ring-indigo-500/20 transition"
+            class="w-full max-w-3xl bg-white min-h-[500px] sm:min-h-[700px] shadow-xs sm:shadow-sm border border-slate-200/80 rounded-lg sm:rounded-xl p-4 sm:p-8 md:p-12 focus:ring-2 focus:ring-indigo-500/20 transition break-words"
           ></div>
         </div>
       </div>
@@ -177,26 +278,26 @@
   </div>
 
   <!-- MODAL 1: SHARE DOCUMENT -->
-  <div id="share-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-        <div>
+  <div id="share-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div class="min-w-0 pr-2">
           <h3 class="font-bold text-slate-900 text-base">Share Document</h3>
-          <p id="share-modal-subtitle" class="text-xs text-slate-500"></p>
+          <p id="share-modal-subtitle" class="text-xs text-slate-500 truncate"></p>
         </div>
-        <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeShareModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg shrink-0"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <div class="p-5 space-y-4">
+      <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
         <div id="share-grant-form" class="space-y-2">
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Grant Access to Team Member</label>
-          <div class="flex gap-2">
-            <select id="share-target-user" class="flex-1 border border-slate-300 rounded-lg px-3 py-1.5 text-sm"></select>
-            <select id="share-permission" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <select id="share-target-user" class="w-full sm:flex-1 border border-slate-300 rounded-lg px-3 py-2 sm:py-1.5 text-xs sm:text-sm"></select>
+            <select id="share-permission" class="w-full sm:w-auto border border-slate-300 rounded-lg px-2.5 py-2 sm:py-1.5 text-xs sm:text-sm">
               <option value="edit">Can Edit</option>
               <option value="view">View Only</option>
             </select>
-            <button onclick="grantShareAccess()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition">
+            <button onclick="grantShareAccess()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 sm:py-1.5 rounded-lg transition shrink-0">
               Share
             </button>
           </div>
@@ -211,39 +312,57 @@
   </div>
 
   <!-- MODAL 2: FILE UPLOAD (.txt, .md, .docx) -->
-  <div id="upload-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-        <div>
-          <h3 id="upload-modal-title" class="font-bold text-slate-900 text-base">Upload File to Workspace</h3>
+  <div id="upload-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div class="min-w-0 pr-2">
+          <h3 id="upload-modal-title" class="font-bold text-slate-900 text-base truncate">Upload File to Workspace</h3>
           <p class="text-xs text-slate-500">Supported formats: <code>.md</code>, <code>.txt</code>, <code>.docx</code> (Max 5MB)</p>
         </div>
-        <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeUploadModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg shrink-0"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <form onsubmit="handleFileUpload(event)" class="p-5 space-y-4">
+      <form onsubmit="handleFileUpload(event)" class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
         <input type="hidden" id="upload-mode" value="new" />
-        <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-indigo-500 transition">
+        <div class="border-2 border-dashed border-slate-300 rounded-xl p-5 sm:p-6 text-center hover:border-indigo-500 transition">
           <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-600 mb-2"></i>
           <input id="file-input" type="file" accept=".txt,.md,.docx" required class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
         </div>
         <div id="upload-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200"></div>
-        <div class="flex justify-end gap-2">
-          <button type="button" onclick="closeUploadModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-600">Cancel</button>
-          <button type="submit" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold">Upload & Convert</button>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeUploadModal()" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs">Upload & Convert</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-4 right-4 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg z-50"></div>
+  <div id="toast" class="hidden fixed bottom-4 right-4 left-4 sm:left-auto bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg z-50 text-center sm:text-left transition-opacity"></div>
 
   <script>
     let users = [];
     let currentUserId = 'user-1';
     let currentDoc = null;
     let autoSaveTimer = null;
+
+    // Mobile sidebar drawer state controller
+    function toggleSidebar(forceOpen) {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+
+      const isCurrentlyClosed = sidebar.classList.contains('-translate-x-full');
+      const shouldOpen = (typeof forceOpen === 'boolean') ? forceOpen : isCurrentlyClosed;
+
+      if (shouldOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
 
     async function apiFetch(url, options = {}) {
       const headers = { ...(options.headers || {}), 'x-user-id': currentUserId };
@@ -296,12 +415,12 @@
       const renderItem = (doc, isOwned) => {
         const active = currentDoc && currentDoc.id === doc.id;
         const roleBadge = isOwned
-          ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium">Owner</span>`
-          : `<span class="text-[10px] px-1.5 py-0.5 rounded ${doc.access_role === 'edit' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'} font-medium">${doc.access_role === 'edit' ? 'Can Edit' : 'View Only'}</span>`;
+          ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium shrink-0">Owner</span>`
+          : `<span class="text-[10px] px-1.5 py-0.5 rounded ${doc.access_role === 'edit' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'} font-medium shrink-0">${doc.access_role === 'edit' ? 'Can Edit' : 'View Only'}</span>`;
 
         return `
           <button onclick="selectDocument('${doc.id}')" class="w-full text-left p-2.5 rounded-xl transition flex items-start justify-between gap-2 ${active ? 'bg-indigo-50/80 border border-indigo-200' : 'hover:bg-slate-100 border border-transparent'}">
-            <div class="min-w-0">
+            <div class="min-w-0 flex-1">
               <div class="font-semibold text-xs text-slate-800 truncate">${doc.title}</div>
               <div class="text-[11px] text-slate-400 truncate mt-0.5">
                 ${isOwned ? (doc.share_count > 0 ? `<i class="fa-solid fa-user-group mr-1 text-indigo-500"></i>Shared (${doc.share_count})` : 'Private') : `By ${doc.owner_name}`}
@@ -341,6 +460,11 @@
         const doc = await apiFetch(`/api/documents/${id}`);
         currentDoc = doc;
 
+        // Auto-close mobile drawer on document selection so editor is immediately visible
+        if (window.innerWidth < 1024) {
+          toggleSidebar(false);
+        }
+
         document.getElementById('empty-state').classList.add('hidden');
         document.getElementById('editor-container').classList.remove('hidden');
 
@@ -361,13 +485,13 @@
 
         const badge = document.getElementById('access-badge');
         if (doc.access_role === 'owner') {
-          badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-800';
+          badge.className = 'text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-800 shrink-0';
           badge.textContent = 'Owner';
         } else if (doc.access_role === 'edit') {
-          badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800';
+          badge.className = 'text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 shrink-0';
           badge.textContent = 'Shared • Can Edit';
         } else {
-          badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800';
+          badge.className = 'text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800 shrink-0';
           badge.textContent = 'Shared • View Only';
         }
 
@@ -396,7 +520,7 @@
 
     function scheduleAutoSave() {
       if (!currentDoc || currentDoc.access_role === 'view') return;
-      document.getElementById('save-status').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>Unsaved changes...`;
+      document.getElementById('save-status').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>Saving...`;
       clearTimeout(autoSaveTimer);
       autoSaveTimer = setTimeout(() => saveCurrentDocument(false), 700);
     }
@@ -428,6 +552,9 @@
             content: '<h1>Untitled Document</h1><p>Start writing your product spec or notes here...</p>'
           })
         });
+        if (window.innerWidth < 1024) {
+          toggleSidebar(false);
+        }
         await selectDocument(created.id);
         showToast('Created new document');
       } catch (err) {
@@ -470,25 +597,25 @@
       const isOwner = currentDoc.access_role === 'owner';
       const ownerRow = `
         <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
-          <div>
-            <div class="text-xs font-semibold text-slate-800">${currentDoc.owner.name} (Owner)</div>
-            <div class="text-[11px] text-slate-500">${currentDoc.owner.email}</div>
+          <div class="min-w-0 pr-2">
+            <div class="text-xs font-semibold text-slate-800 truncate">${currentDoc.owner.name} (Owner)</div>
+            <div class="text-[11px] text-slate-500 truncate">${currentDoc.owner.email}</div>
           </div>
-          <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Owner</span>
+          <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded shrink-0">Owner</span>
         </div>
       `;
 
       const shareRows = (currentDoc.shares || []).map(s => `
         <div class="flex items-center justify-between p-2 rounded-lg border border-slate-200">
-          <div>
-            <div class="text-xs font-semibold text-slate-800">${s.name}</div>
-            <div class="text-[11px] text-slate-500">${s.email}</div>
+          <div class="min-w-0 pr-2">
+            <div class="text-xs font-semibold text-slate-800 truncate">${s.name}</div>
+            <div class="text-[11px] text-slate-500 truncate">${s.email}</div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             <span class="text-xs font-medium px-2 py-0.5 rounded ${s.permission === 'edit' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
               ${s.permission === 'edit' ? 'Can Edit' : 'View Only'}
             </span>
-            ${isOwner ? `<button onclick="revokeAccess('${s.user_id}')" class="text-xs text-red-500 hover:text-red-700 px-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+            ${isOwner ? `<button onclick="revokeAccess('${s.user_id}')" class="text-xs text-red-500 hover:text-red-700 p-1" title="Revoke access"><i class="fa-solid fa-trash-can"></i></button>` : ''}
           </div>
         </div>
       `).join('');
@@ -532,7 +659,7 @@
     function openUploadModal(mode) {
       document.getElementById('upload-mode').value = mode;
       document.getElementById('upload-modal-title').textContent =
-        mode === 'append' ? `Import File into "${currentDoc.title}"` : 'Upload File as New Document';
+        mode === 'append' ? `Import into "${currentDoc.title}"` : 'Upload File as New Document';
       document.getElementById('upload-error').classList.add('hidden');
       document.getElementById('file-input').value = '';
       document.getElementById('upload-modal').classList.remove('hidden');
@@ -561,6 +688,9 @@
           body: formData
         });
         closeUploadModal();
+        if (window.innerWidth < 1024) {
+          toggleSidebar(false);
+        }
         await selectDocument(res.document.id);
         showToast(mode === 'append' ? 'File imported into current document!' : 'Created new document from uploaded file!');
       } catch (err) {
